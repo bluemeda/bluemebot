@@ -65,13 +65,16 @@ public func configure(_ app: Application) async throws {
     )
 
     // System prompt config
-    let yamlPath = app.directory.workingDirectory + "system_prompts.yaml"
+
+    let yamlPath = app.directory.workingDirectory + "resources/system_prompts.yaml"
+
     guard let assistantName = Environment.get("ASSISTANT_NAME") else {
         throw logAndAbort(
             app.logger,
             errorMessage: "Missing ASSISTANT_NAME environment variable")
     }
-    let promptConfig = try PromptConfig(yamlFile: yamlPath, assistantName: assistantName)
+    let promptConfig = try PromptConfig(
+        yamlFile: yamlPath, assistantName: assistantName)
 
     let openAIService = OpenAIService(
         client: app.client, apiKey: openAIKey, promptConfig: promptConfig)
