@@ -25,12 +25,14 @@ services:
     environment:
       <<: *shared_environment
     env_file: ".env"
+    volumes:
+      - ./resources:/app/resources
     ports:
       - '8089:8080'
-    volumes:
-      - ./resources: /app/resources
     # user: '0' # uncomment to run as root for testing purposes even though Dockerfile defines 'vapor' user.
     command: ["serve", "--env", "production", "--hostname", "0.0.0.0", "--port", "8080"]
+    networks:
+      - web
   migrate:
     image: ghcr.io/bluemeda/bluemebot:main
       #build:
@@ -38,9 +40,13 @@ services:
     environment:
       <<: *shared_environment
     env_file: ".env"
+    volumes:
+      - ./resources:/app/resources
     command: ["migrate", "--yes"]
     deploy:
       replicas: 0
+    networks:
+      - web
   revert:
     image: ghcr.io/bluemeda/bluemebot:main
       #build:
@@ -48,6 +54,15 @@ services:
     environment:
       <<: *shared_environment
     env_file: ".env"
+    volumes:
+      - ./resources:/app/resources
     command: ["migrate", "--revert", "--yes"]
     deploy:
       replicas: 0
+    networks:
+      - web
+
+
+networks:
+  web:
+    external: true
