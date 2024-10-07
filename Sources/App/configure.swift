@@ -83,7 +83,7 @@ public func configure(_ app: Application) async throws {
     let messageService = await MessageService(app: app)
 
     app.databases.use(
-        DatabaseConfigurationFactory.sqlite(.file("db.sqlite")), as: .sqlite)
+        DatabaseConfigurationFactory.sqlite(.file("resources/db.sqlite")), as: .sqlite)
     app.migrations.add(CreateMessage())
 
     await app.botActor.setBot(bot)
