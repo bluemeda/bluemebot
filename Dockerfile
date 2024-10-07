@@ -72,7 +72,7 @@ RUN useradd --user-group --create-home --system --skel /dev/null --home-dir /app
 WORKDIR /app
 
 # Add Volume mountpoint
-VOLUME /app/resources
+COPY ./resources /app/resources
 
 # Copy built executable and any staged resources from builder
 COPY --from=build --chown=vapor:vapor /staging /app
