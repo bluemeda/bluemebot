@@ -58,19 +58,19 @@ final class DefaultBotHandlers {
                         for: chatID, assistant: assistantName
                     )
 
-                let openAIResponse = try await model.generateResponse(
+                let modelResponse = try await model.generateResponse(
                     messages: contextMessages
                 )
 
                 try await messageService.addMessage(
                     chatID: chatID,
                     role: "assistant",
-                    content: openAIResponse,
+                    content: modelResponse,
                     assistant: assistantName,
                     provider: model.providerName
                 )
 
-                let sanitizedResponse = sanitizeText(openAIResponse)
+                let sanitizedResponse = sanitizeText(modelResponse)
 
                 let params = TGSendMessageParams(
                     chatId: .chat(message.chat.id),
@@ -92,31 +92,25 @@ final class DefaultBotHandlers {
     }
 
     private static func sanitizeText(_ input: String) -> String {
-        // Define the characters to escape and their corresponding escape sequences
+
         let escapeChars: [Character] = [
-            "\\", "`", ")", "_", "*", "[", "]", "(", "~", ">", "#", "+", "-",
-            "=", "|", "{", "}", ".", "!",
+            "\\", "`", ")", "[", "]", "(", ">", "#", "+", "-",
+            "=", "|", "{", "}", ".", "!"
         ]
 
-        // Helper function to escape characters
         func escape(_ char: Character) -> String {
             return escapeChars.contains(char) ? "\\\(char)" : String(char)
         }
 
-        // Use a StringBuilder (represented by an array here) for efficient string concatenation
         var sanitized = [String]()
 
-        // Process each character in the input string
         for char in input {
             let escapedChar = escape(char)
             sanitized.append(escapedChar)
         }
 
-        // Handle specific rules for italic/underline and custom emoji
-        let result = sanitized.joined().replacingOccurrences(
-            of: "__", with: "__**")  // Handle underline and italic ambiguity
+        let result = sanitized.joined()
 
-        // Return the final sanitized result
         return result
     }
 

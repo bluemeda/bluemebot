@@ -43,7 +43,7 @@ final class GeminiService: ProviderProtocol {
             temperature: 0.75,
             topK: 40,
             topP: 0.95,
-            responseMimeType: "application/json",
+            responseMimeType: "text/plain",
             maxOutputTokens: 8192
         )
 
@@ -108,7 +108,6 @@ final class GeminiService: ProviderProtocol {
             throw Abort(
                 .badRequest, reason: "No message found in OpenAI response.")
         }
-
         return message
     }
 }
