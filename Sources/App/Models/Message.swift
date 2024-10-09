@@ -16,27 +16,38 @@ final class Message: Model, @unchecked Sendable {
 
     @Field(key: "chat_id")
     var chatID: Int64
-    
+
     @Field(key: "role")
     var role: String
-    
+
     @Field(key: "content")
     var content: String
-    
+
     @Field(key: "assistant")
     var assistant: String
-    
+
+    @Field(key: "provider")
+    var provider: String
+
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
-    
+
     init() {}
-    
-    init(id: UUID? = nil, chatID: Int64, role: String, content: String, assistant: String) {
+
+    init(
+        id: UUID? = nil,
+        chatID: Int64,
+        role: String,
+        content: String,
+        assistant: String,
+        provider: String
+    ) {
         self.id = id
         self.chatID = chatID
         self.role = role
         self.content = content
         self.assistant = assistant
+        self.provider = provider
     }
 
 }
