@@ -17,6 +17,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
         .package(url: "https://github.com/nerzh/swift-telegram-sdk",  .upToNextMajor(from: "3.6.0")),
         .package(url: "https://github.com/jpsim/Yams.git", .upToNextMajor(from: "5.1.3")),
+        .package(url: "https://github.com/google/generative-ai-swift", .upToNextMajor(from: "0.5.6")),
     ],
     targets: [
         .executableTarget(
@@ -28,7 +29,8 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "SwiftTelegramSdk", package: "swift-telegram-sdk"),
-                .product(name: "Yams", package: "yams")
+                .product(name: "Yams", package: "yams"),
+                .product(name: "GoogleGenerativeAI", package: "generative-ai-swift")
             ],
             swiftSettings: swiftSettings
         ),

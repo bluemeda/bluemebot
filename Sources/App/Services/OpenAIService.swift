@@ -7,7 +7,9 @@
 
 import Vapor
 
-final class OpenAIService: Sendable {
+final class OpenAIService: ProviderProtocol {
+    let providerName: String = "OPENAI"
+    
     private let client: Client
     private let apiKey: String
     private let promptConfig: PromptConfig

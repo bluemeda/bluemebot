@@ -1,5 +1,6 @@
 import Fluent
 import FluentSQLiteDriver
+import GoogleGenerativeAI
 import NIOSSL
 @preconcurrency import SwiftTelegramSdk
 import Vapor
@@ -24,6 +25,14 @@ public func configure(_ app: Application) async throws {
             app.logger,
             errorMessage: "Missing OPENAI_API_KEY environment variable")
     }
+
+    // GEMINI API KEY
+    guard let geminiApiKey = Environment.get("GEMINI_API_KEY") else {
+        throw logAndAbort(
+            app.logger,
+            errorMessage: "Missing GEMINI_API_KEY environment variable")
+    }
+
     // TELEGRAM CONNECTION TYPE
     let telegramMode = Environment.get("TELEGRAM_MODE") ?? "longpolling"  // Default to long polling
 
@@ -66,7 +75,8 @@ public func configure(_ app: Application) async throws {
 
     // System prompt config
 
-    let yamlPath = app.directory.workingDirectory + "resources/system_prompts.yaml"
+    let yamlPath =
+        app.directory.workingDirectory + "resources/system_prompts.yaml"
 
     guard let assistantName = Environment.get("ASSISTANT_NAME") else {
         throw logAndAbort(
@@ -76,19 +86,49 @@ public func configure(_ app: Application) async throws {
     let promptConfig = try PromptConfig(
         yamlFile: yamlPath, assistantName: assistantName)
 
+    // OpenAI
     let openAIService = OpenAIService(
-        client: app.client, apiKey: openAIKey, promptConfig: promptConfig)
+        client: app.client,
+        apiKey: openAIKey,
+        promptConfig: promptConfig)
     app.openAIService = openAIService
 
+    // Message Service
     let messageService = await MessageService(app: app)
 
+    // Gemini AI
+    let geminiService = GeminiService(
+        client: app.client,
+        apiKey: geminiApiKey,
+        promptConfig: promptConfig)
+    app.geminiService = geminiService
+
+    guard let providerService = Environment.get("PROVIDER") else {
+        throw logAndAbort(
+            app.logger, errorMessage: "Missing PROVIDER environment variable")
+    }
+
     app.databases.use(
-        DatabaseConfigurationFactory.sqlite(.file("resources/db.sqlite")), as: .sqlite)
+        DatabaseConfigurationFactory.sqlite(.file("resources/db.sqlite")),
+        as: .sqlite)
     app.migrations.add(CreateMessage())
+
+    let providerName: ProviderProtocol
+
+    if providerService == "GEMINI" {
+        providerName = app.geminiService
+    } else if providerService == "OPENAI" {
+        providerName = app.openAIService
+    } else {
+        throw logAndAbort(
+            app.logger,
+            errorMessage: "Invalid PROVIDER value. Must be 'GEMINI' or 'OPENAI'."
+        )
+    }
 
     await app.botActor.setBot(bot)
     await DefaultBotHandlers.addHandlers(
-        bot: app.botActor.bot, openAI: app.openAIService,
+        bot: app.botActor.bot, model: providerName,
         messageService: messageService, promptConfig: promptConfig)
 
     try await app.botActor.bot.start()

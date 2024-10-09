@@ -13,13 +13,13 @@ final class DefaultBotHandlers {
 
     static func addHandlers(
         bot: TGBot,
-        openAI: OpenAIService,
+        model: ProviderProtocol,
         messageService: MessageService,
         promptConfig: PromptConfig
     ) async {
         await messageHandler(
             bot: bot,
-            openAI: openAI,
+            model: model,
             messageService: messageService,
             promptConfig: promptConfig)
         
@@ -28,7 +28,7 @@ final class DefaultBotHandlers {
 
     private static func messageHandler(
         bot: TGBot,
-        openAI: OpenAIService,
+        model: ProviderProtocol,
         messageService: MessageService,
         promptConfig: PromptConfig
     )
@@ -49,7 +49,8 @@ final class DefaultBotHandlers {
                     chatID: chatID,
                     role: "user",
                     content: userMessage,
-                    assistant: promptConfig.getAssistantName()
+                    assistant: promptConfig.getAssistantName(),
+                    provider: model.providerName
                 )
 
                 let contextMessages =
@@ -57,7 +58,7 @@ final class DefaultBotHandlers {
                         for: chatID, assistant: assistantName
                     )
 
-                let openAIResponse = try await openAI.generateResponse(
+                let openAIResponse = try await model.generateResponse(
                     messages: contextMessages
                 )
 
@@ -65,7 +66,8 @@ final class DefaultBotHandlers {
                     chatID: chatID,
                     role: "assistant",
                     content: openAIResponse,
-                    assistant: assistantName
+                    assistant: assistantName,
+                    provider: model.providerName
                 )
 
                 let sanitizedResponse = sanitizeText(openAIResponse)
