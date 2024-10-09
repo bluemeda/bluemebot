@@ -1,6 +1,5 @@
 import Fluent
 import FluentSQLiteDriver
-import GoogleGenerativeAI
 import NIOSSL
 @preconcurrency import SwiftTelegramSdk
 import Vapor
