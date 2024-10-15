@@ -71,6 +71,7 @@ final class DefaultBotHandlers {
                 )
 
                 let sanitizedResponse = sanitizeText(modelResponse)
+                bot.log.debug(Logger.Message(stringLiteral: sanitizedResponse))
 
                 let params = TGSendMessageParams(
                     chatId: .chat(message.chat.id),
@@ -94,8 +95,8 @@ final class DefaultBotHandlers {
     private static func sanitizeText(_ input: String) -> String {
 
         let escapeChars: [Character] = [
-            "\\", "`", ")", "[", "]", "(", ">", "#", "+", "-",
-            "=", "|", "{", "}", ".", "!"
+            "\\", ")", "[", "]", "(", ">", "#", "+", "-",
+            "=", "{", "}", ".", "!"
         ]
 
         func escape(_ char: Character) -> String {
