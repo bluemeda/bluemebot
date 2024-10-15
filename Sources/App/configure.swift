@@ -9,8 +9,6 @@ public func configure(_ app: Application) async throws {
     // Uncomment to serve files from /Public folder
     // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
-    app.logger.logLevel = .info
-
     // TELEGRAM BOT TOKEN
     guard let telegramBotToken = Environment.get("TELEGRAM_BOT_TOKEN") else {
         throw logAndAbort(
