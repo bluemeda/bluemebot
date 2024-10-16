@@ -41,7 +41,10 @@ final class DefaultBotHandlers {
                 guard let message = update.message else { return }
 
                 // Prepare parameters for sending a message
-                let userMessage = message.text ?? ""
+                guard let userMessage = message.text else {
+                    return
+                }
+                
                 let chatID = message.chat.id
                 let assistantName = promptConfig.getAssistantName()
 
