@@ -22,7 +22,7 @@ final class DefaultBotHandlers {
             model: model,
             messageService: messageService,
             promptConfig: promptConfig)
-        
+
         await commandStartHandler(bot: bot)
     }
 
@@ -44,12 +44,18 @@ final class DefaultBotHandlers {
                 guard let userMessage = message.text else {
                     return
                 }
-                
-                let chatID = message.chat.id
+
+                let chatId = message.chat.id
                 let assistantName = promptConfig.getAssistantName()
 
+                let actionsParams = TGSendChatActionParams(
+                    chatId: .chat(chatId),
+                    action: "typing"
+                )
+                try await bot.sendChatAction(params: actionsParams)
+
                 try await messageService.addMessage(
-                    chatID: chatID,
+                    chatID: chatId,
                     role: "user",
                     content: userMessage,
                     assistant: promptConfig.getAssistantName(),
@@ -58,7 +64,7 @@ final class DefaultBotHandlers {
 
                 let contextMessages =
                     try await messageService.getLatestMessages(
-                        for: chatID, assistant: assistantName
+                        for: chatId, assistant: assistantName
                     )
 
                 let modelResponse = try await model.generateResponse(
@@ -66,7 +72,7 @@ final class DefaultBotHandlers {
                 )
 
                 try await messageService.addMessage(
-                    chatID: chatID,
+                    chatID: chatId,
                     role: "assistant",
                     content: modelResponse,
                     assistant: assistantName,
@@ -76,14 +82,14 @@ final class DefaultBotHandlers {
                 let sanitizedResponse = sanitizeText(modelResponse)
                 bot.log.debug(Logger.Message(stringLiteral: sanitizedResponse))
 
-                let params = TGSendMessageParams(
-                    chatId: .chat(message.chat.id),
+                let messageParams = TGSendMessageParams(
+                    chatId: .chat(chatId),
                     text: sanitizedResponse,
                     parseMode: .markdownV2
                 )
 
                 // Send the message asynchronously
-                try await bot.sendMessage(params: params)
+                try await bot.sendMessage(params: messageParams)
             })
     }
 
@@ -99,7 +105,7 @@ final class DefaultBotHandlers {
 
         let escapeChars: [Character] = [
             "\\", ")", "[", "]", "(", ">", "#", "+", "-",
-            "=", "{", "}", ".", "!"
+            "=", "{", "}", ".", "!",
         ]
 
         func escape(_ char: Character) -> String {
