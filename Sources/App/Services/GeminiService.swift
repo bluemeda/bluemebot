@@ -36,7 +36,7 @@ final class GeminiService: ProviderProtocol {
 
     // Method to generate a response from OpenAI
     func generateResponse(messages: [Message]) async throws -> String {
-        let modelName = "gemini-1.5-flash-002"
+        let modelName = "gemini-2.0-flash-exp"
         let url = URI(string: "https://generativelanguage.googleapis.com/v1beta/models/\(modelName):generateContent?key=\(apiKey)")
 
         let generationConfig = GeminiRequest.GenerationConfig(
